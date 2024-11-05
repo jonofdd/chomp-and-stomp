@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  hello-world:
+    image: hello-world-image
+    deploy:
+      replicas: 3
+      placement:
+        preferences:
+            - spread: node.hostname
+    ports:
+      - "9106:80"

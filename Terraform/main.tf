@@ -4,11 +4,6 @@ resource "aws_vpc" "harper_vpc" {
   enable_dns_hostnames = true
 }
 
-# resource "aws_key_pair" "al-key" {
-#   key_name   = "hurez@DESKTOP-G7B1SVC"
-#   public_key = file("C:\\Users\\hurez\\.ssh\\id_ed25519.pub")
-# }
-
 resource "aws_subnet" "harper_subnet" {
   vpc_id     = aws_vpc.harper_vpc.id
   cidr_block = "10.0.1.0/24"
@@ -83,6 +78,13 @@ resource "aws_security_group" "harper_sg" {
   ingress {
     from_port   = 9105
     to_port     = 9105
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9106
+    to_port     = 9106
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
