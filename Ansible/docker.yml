@@ -1,0 +1,66 @@
+---
+- name: Install Docker on all VMs
+  hosts: all_nodes
+  become: true
+  tasks:
+    - name: Install  dependencies
+      yum:
+        name:
+          - yum-utils
+          - ca-certificates
+          - curl-minimal
+        state: present
+
+    - name: Add Docker repository
+      shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+        update_cache: true
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+
+    - name: Wait for Docker service to start
+      wait_for:
+        path: /var/run/docker.sock
+        timeout: 30
+      when: inventory_hostname in groups['master']
+
+    - name: Initialize Docker Swarm on Master
+      shell: |
+        docker swarm init --advertise-addr {{ ansible_default_ipv4.address }}
+      register: swarm_init
+      ignore_errors: yes
+      when: inventory_hostname in groups['master']
+
+    - name: Get Join Token for Worker Nodes
+      shell: |
+        docker swarm join-token worker -q
+      register: worker_join_token
+      when: inventory_hostname in groups['master']
+
+    - name: Set fact for token
+      set_fact:
+        docker_token: "{{ worker_join_token.stdout }}"
+      when: inventory_hostname in groups['master']
+
+    - name: Get join command from master node
+      set_fact:
+        docker_token: "{{ hostvars[groups['master'][0]].docker_token }}"
+
+    - name: Join Worker Nodes to Swarm
+      shell: |
+        docker swarm join --token {{ hostvars[groups['master'][0]].docker_token }} {{ hostvars[groups['master'][0]].ansible_default_ipv4.address }}:2377
+      when: inventory_hostname in groups['workers']

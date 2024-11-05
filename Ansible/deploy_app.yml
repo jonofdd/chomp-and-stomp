@@ -1,0 +1,63 @@
+---
+- name: Depploy Hello World app
+  hosts: master
+  become: true
+  tasks:
+    - name: Create app directory
+      file:
+        path: /root/app
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copy build script
+      copy:
+        src: build.sh
+        dest: /root/app
+        owner: root
+        group: root
+        mode: 0744
+
+    - name: Copy deploy script
+      copy:
+        src: deploy.sh
+        dest: /root/app
+        owner: root
+        group: root
+        mode: 0744
+
+    - name: Copy docker stack file
+      copy:
+        src: docker-stack.yml
+        dest: /root/app
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy the Dockerfile
+      copy:
+        src: Dockerfile
+        dest: /root/app
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy package.json file
+      copy:
+        src: package.json
+        dest: /root/app
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy app.js file
+      copy:
+        src: app.js
+        dest: /root/app
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Deploy application to stack
+      shell: /bin/bash /root/app/build.sh && /bin/bash /root/app/deploy.sh

@@ -1,0 +1,10 @@
+[master]
+ec2-54-78-190-242.eu-west-1.compute.amazonaws.com
+
+[workers]
+ec2-54-155-137-167.eu-west-1.compute.amazonaws.com
+ec2-54-194-227-189.eu-west-1.compute.amazonaws.com
+
+[all_nodes:children]
+master
+workers

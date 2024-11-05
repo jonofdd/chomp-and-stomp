@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "9105:8080"
